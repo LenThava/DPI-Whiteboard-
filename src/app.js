@@ -1,5 +1,6 @@
 import { EVENT_TYPES, createEventFactory, replayEvents } from "./replay.js";
-import { appendLocalEvent, loadEvents } from "./storage.js";
+import { createEventStore } from "./storage.js";
+import { APP_ID, BOARD_ID, EVENT_SCHEMA } from "./config.js";
 
 const board = document.querySelector("#board");
 const userNameInput = document.querySelector("#user-name");
@@ -23,8 +24,9 @@ const BOARD_WIDTH = 1000;
 const BOARD_HEIGHT = 680;
 const USER_NAME_KEY = "tremola-whiteboard-user-name";
 
+const eventStore = createEventStore();
 const author = getOrCreateAuthor();
-const createEvent = createEventFactory(author, loadEvents().length);
+let createEvent = createEventFactory(author);
 
 let currentTool = "select";
 let selectedIds = new Set();
@@ -32,10 +34,17 @@ let dragState = null;
 let drawingState = null;
 let selectionState = null;
 let noteDraft = null;
-let state = replayEvents(loadEvents());
+let state = replayEvents([]);
 
 userNameInput.value = getStoredUserName();
-render();
+init();
+
+async function init() {
+  const events = await eventStore.loadEvents();
+  createEvent = createEventFactory(author, events.filter((event) => event.author === author).length);
+  state = replayEvents(events);
+  render();
+}
 
 userNameInput.addEventListener("input", () => {
   localStorage.setItem(USER_NAME_KEY, getCurrentUserName());
@@ -262,11 +271,15 @@ board.addEventListener("dblclick", (event) => {
   });
 });
 
-function appendEvent(op, payload) {
-  const events = appendLocalEvent(createEvent(op, {
+async function appendEvent(op, payload) {
+  const event = createEvent(op, {
+    appId: APP_ID,
+    boardId: BOARD_ID,
+    schema: EVENT_SCHEMA,
     actorName: getCurrentUserName(),
     ...payload
-  }));
+  });
+  const events = await eventStore.appendEvent(event);
   state = replayEvents(events);
   render();
 }

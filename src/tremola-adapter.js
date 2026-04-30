@@ -1,21 +1,25 @@
+import { APP_ID, BOARD_ID } from "./config.js";
+
 export function createTremolaAdapter() {
-  const tremola = window.tremola || window.backend;
+  const bridge = window.tremolaWhiteboardStore;
 
   return {
-    isAvailable: Boolean(tremola),
+    name: "tinySSB",
+    isAvailable: Boolean(bridge),
     async appendEvent(event) {
-      if (!tremola) {
-        throw new Error("Tremola backend is not available in this browser context.");
+      if (!bridge) {
+        throw new Error("Tremola bridge is not available.");
       }
 
-      throw new Error("tinySSB append integration still needs the Tremola API binding.");
+      await bridge.appendEvent({ appId: APP_ID, boardId: BOARD_ID, event });
+      return this.loadEvents();
     },
     async loadEvents() {
-      if (!tremola) {
+      if (!bridge) {
         return [];
       }
 
-      throw new Error("tinySSB event loading still needs the Tremola API binding.");
+      return bridge.loadEvents({ appId: APP_ID, boardId: BOARD_ID });
     }
   };
 }

@@ -7,7 +7,11 @@ All shared state is derived from immutable events.
 ```json
 {
   "eventId": "alice:1",
+  "appId": "tremola-whiteboard",
+  "boardId": "default-board",
+  "schema": 1,
   "author": "alice",
+  "actorName": "Alice",
   "seq": 1,
   "time": 1760000000000,
   "op": "create_text",

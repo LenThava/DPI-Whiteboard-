@@ -23,10 +23,10 @@ The app stores every board action as an append-only event. The current board is 
 Tremola Android WebView
         |
         v
-appendEvent(event)
+eventStore.appendEvent(event)
         |
         v
-localStorage adapter now, tinySSB adapter later
+localStorage now, Tremola/tinySSB bridge later
         |
         v
 replayEvents(events)
@@ -37,7 +37,7 @@ current board state
 
 The important rule is: UI actions never mutate board objects directly. They always append events first, then the board is rendered from replayed events.
 
-`src/storage.js` is the temporary local adapter. `src/tremola-adapter.js` marks the boundary where the later Tremola/tinySSB append/read API should be connected.
+`src/storage.js` chooses the event store. In the browser it uses `localStorage`. In Tremola it automatically uses `window.tremolaWhiteboardStore` if that bridge exists. `src/tremola-adapter.js` is the only file that should need real tinySSB bridge calls later.
 
 ## Tremola and tinySSB Synchronization
 
@@ -51,11 +51,20 @@ UI action -> board event -> tinySSB append-only log -> replayEvents(events)
 
 When two Android devices meet over BLE, Tremola/tinySSB replicates feed entries between them. After synchronization, each device loads the same set of board events, sorts them deterministically, and rebuilds the board through `replayEvents`. The UI does not need a central server and does not need live internet access.
 
-The important integration point is replacing the temporary functions in `src/storage.js` with Tremola bridge calls:
+The important integration point is implementing this bridge inside Tremola:
 
-- `appendLocalEvent(event)` becomes "append this JSON event to my tinySSB feed"
-- `loadEvents()` becomes "read all board events known from my feed and replicated peer feeds"
-- `replayEvents(events)` stays the same
+```js
+window.tremolaWhiteboardStore = {
+  async appendEvent({ appId, boardId, event }) {
+    // append event JSON to tinySSB
+  },
+  async loadEvents({ appId, boardId }) {
+    // return own and replicated events for this app/board
+  }
+};
+```
+
+The UI already calls only `eventStore.appendEvent(event)` and `eventStore.loadEvents()`, so `replayEvents(events)` stays the same.
 
 So the project can be developed locally first, then connected to Tremola once the mini-app bridge API is available.
 

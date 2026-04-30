@@ -1,11 +1,12 @@
-const STORAGE_KEY = "dpi-whiteboard-events";
+import { APP_ID } from "./config.js";
+import { createTremolaAdapter } from "./tremola-adapter.js";
 
-// Adapter boundary: this file is intentionally small so Tremola/tinySSB can
-// replace localStorage without changing the board UI or replay logic.
+const STORAGE_KEY = `${APP_ID}:events`;
+const LEGACY_STORAGE_KEY = "dpi-whiteboard-events";
 
 export function loadEvents() {
   try {
-    const rawEvents = localStorage.getItem(STORAGE_KEY);
+    const rawEvents = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
     return rawEvents ? JSON.parse(rawEvents) : [];
   } catch {
     return [];
@@ -18,6 +19,7 @@ export function saveEvents(events) {
 
 export function clearEvents() {
   localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(LEGACY_STORAGE_KEY);
 }
 
 export function appendLocalEvent(event) {
@@ -30,4 +32,21 @@ export function appendLocalEvent(event) {
   }
 
   return events;
+}
+
+export function createEventStore() {
+  const tremola = createTremolaAdapter();
+  return tremola.isAvailable ? tremola : createLocalStore();
+}
+
+function createLocalStore() {
+  return {
+    name: "localStorage",
+    async loadEvents() {
+      return loadEvents();
+    },
+    async appendEvent(event) {
+      return appendLocalEvent(event);
+    }
+  };
 }
