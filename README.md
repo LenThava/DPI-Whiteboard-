@@ -1,13 +1,13 @@
 # Tremola Whiteboard
 
-Whiteboard Mini-App fuer Tremola.
+Whiteboard Mini-App fürr Tremola.
 
 ## Benutzung
 
-- `Notiz` waehlen und eine Notiz schreiben
-- `Zeichnen` waehlen und auf der Flaeche zeichnen
-- `Auswahl` waehlen und einen Rahmen um Objekte ziehen
-- Ausgewaehlte Objekte koennen bearbeitet oder geloescht werden
+- Mit Notiz eine Notiz erstellen (Post it mässig)
+- mit Zeichnen kann man auf dem Whiteboard zeichnen
+- Mit Auswahl können Objekte (auch mehrere) bearbeitet oder bewegt oder gelöscht werden
+ 
 
 ## Lokal starten
 
