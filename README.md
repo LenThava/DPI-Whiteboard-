@@ -1,33 +1,34 @@
 # Tremola Whiteboard
 
-Kleine offline-first Whiteboard Mini-App fuer Tremola.
+Whiteboard Mini-App fuer Tremola.
 
 ## Benutzung
 
-- Name eintragen
-- `Notiz` waehlen und eine Notiz schreiben
-- `Zeichnen` waehlen und auf der Flaeche zeichnen
-- `Auswahl` waehlen und einen Rahmen um Objekte ziehen
-- Ausgewaehlte Objekte koennen bearbeitet oder geloescht werden
+- Name eintragen (kein muss)
+- mit `Notiz`  eine Notiz schreiben (wie sticky notes)
+- mit `Zeichnen` auf dem bord zeichnen
+- mit `Auswahl` Objekte wählen in dem man eine box darum zeichnet (multi objekt wahl möglich)
+- Ausgewaehlte Objekte können bearbeitet oder gelöscht werden (falls ein objekt schon gewählt wurde werden die knöpfe grau)
+  
 
 ## Lokal starten
 
-Einfach `index.html` im Browser oeffnen.
+`index.html` im Browser öffnen.
 
-Oder mit lokalem Server:
+oder mit Py3 server:
 
 ```bash
 python3 -m http.server 8080
 ```
 
-Dann `http://localhost:8080` oeffnen.
+danach über `http://localhost:8080` öffnen
 
-## Naechste Schritte fuer Tremola
+## next steps um mit Tremola zu integrieren
 
-- Mini-App in Tremola WebView laden
-- `window.tremolaWhiteboardStore` in Tremola implementieren
-- `appendEvent` schreibt Events in tinySSB
-- `loadEvents` liest eigene und per BLE synchronisierte Events
-- Mit zwei Android-Geraeten testen
+- als Mini-App in Tremola webview laden
+- window.tremolaWhiteboardStore in Tremola implementieren
+- appendEvent schreibt Events (mit tinySSB)
+- loadEvents liest eigene und BLE synchronisation events
+- mit android testen
 
-Die UI bleibt gleich. Nur der Event-Store wird spaeter an tinySSB/BLE angeschlossen.
+späterer anschluss an den  Event-Store und tinySSB/BLE
