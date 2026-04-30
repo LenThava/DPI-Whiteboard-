@@ -1,6 +1,6 @@
 # Tremola Whiteboard
 
-Kleine offline-first Whiteboard Mini-App fuer Tremola.
+Whiteboard Mini-App fuer Tremola.
 
 ## Benutzung
 
@@ -11,22 +11,22 @@ Kleine offline-first Whiteboard Mini-App fuer Tremola.
 
 ## Lokal starten
 
-Einfach `index.html` im Browser oeffnen.
+`index.html` im Browser öffnen.
 
-Oder mit lokalem Server:
+oder mit Py3 server:
 
 ```bash
 python3 -m http.server 8080
 ```
 
-Dann `http://localhost:8080` oeffnen.
+danach über `http://localhost:8080` öffnen
 
-## Naechste Schritte fuer Tremola
+## next steps um mit Tremola zu integrieren
 
-- Mini-App in Tremola WebView laden
-- `window.tremolaWhiteboardStore` in Tremola implementieren
-- `appendEvent` schreibt Events in tinySSB
-- `loadEvents` liest eigene und per BLE synchronisierte Events
-- Mit zwei Android-Geraeten testen
+- als Mini-App in Tremola webview laden
+- window.tremolaWhiteboardStore in Tremola implementieren
+- appendEvent schreibt Events (mit tinySSB)
+- loadEvents liest eigene und BLE synchronisation events
+- mit android testen
 
-Die UI bleibt gleich. Nur der Event-Store wird spaeter an tinySSB/BLE angeschlossen.
+späterer anschluss an den  Event-Store und tinySSB/BLE
