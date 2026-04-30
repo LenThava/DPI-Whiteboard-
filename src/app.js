@@ -398,7 +398,7 @@ function getBoardPoint(event) {
 function openNoteSheet(draft) {
   noteDraft = draft;
   noteText.value = draft.text;
-  saveNoteButton.textContent = draft.mode === "edit" ? "Save" : "Add note";
+  saveNoteButton.textContent = draft.mode === "edit" ? "Speichern" : "Notiz hinzufügen";
   noteSheet.classList.add("is-open");
   noteSheet.setAttribute("aria-hidden", "false");
   window.setTimeout(() => noteText.focus(), 80);
@@ -413,9 +413,9 @@ function closeNoteSheet() {
 
 function renderModeHint() {
   const hints = {
-    select: selectedIds.size ? `${selectedIds.size} selected` : "Draw a box around objects",
-    note: "Tap the board to place a note",
-    draw: "Draw with touch or mouse"
+    select: selectedIds.size ? `${selectedIds.size} ausgewählt` : "Rahmen um Objekte ziehen",
+    note: "Auf die Fläche tippen, um eine Notiz zu setzen",
+    draw: "Mit Finger oder Maus zeichnen"
   };
 
   modeHint.textContent = hints[currentTool];
