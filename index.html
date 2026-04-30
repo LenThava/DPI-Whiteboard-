@@ -11,28 +11,40 @@
       <header class="topbar">
         <div>
           <h1>DPI Whiteboard</h1>
-          <p>Offline-first board prototype</p>
+          <p>Tremola mini-app prototype</p>
         </div>
         <div class="sync-pill" id="sync-status">local event log</div>
       </header>
 
       <section class="workspace">
-        <aside class="toolbar" aria-label="Board tools">
-          <button id="tool-select" class="tool-button is-active" type="button">Select</button>
-          <button id="tool-note" class="tool-button" type="button">Note</button>
-          <button id="tool-draw" class="tool-button" type="button">Draw</button>
-          <button id="delete-selected" class="tool-button danger" type="button">Delete</button>
-          <button id="clear-local" class="tool-button subtle" type="button">Clear local</button>
-        </aside>
-
         <section class="board-wrap" aria-label="Shared board">
-          <svg id="board" class="board" viewBox="0 0 1200 760" role="img" aria-label="Object based collaboration board"></svg>
+          <div id="mode-hint" class="mode-hint">Select or drag notes</div>
+          <svg id="board" class="board" viewBox="0 0 1000 680" role="img" aria-label="Object based collaboration board"></svg>
         </section>
 
         <aside class="side-panel">
           <h2>Activity</h2>
           <ol id="activity-log" class="activity-log"></ol>
         </aside>
+      </section>
+
+      <nav class="toolbar" aria-label="Board tools">
+        <button id="tool-select" class="tool-button is-active" type="button">Select</button>
+        <button id="tool-note" class="tool-button primary" type="button">Note</button>
+        <button id="tool-draw" class="tool-button" type="button">Draw</button>
+        <button id="edit-selected" class="tool-button" type="button" disabled>Edit</button>
+        <button id="delete-selected" class="tool-button danger" type="button" disabled>Delete</button>
+      </nav>
+
+      <section id="note-sheet" class="note-sheet" aria-hidden="true">
+        <form id="note-form" class="note-form">
+          <label for="note-text">Note</label>
+          <textarea id="note-text" rows="3" maxlength="180" placeholder="Write a note..."></textarea>
+          <div class="note-actions">
+            <button id="cancel-note" class="sheet-button" type="button">Cancel</button>
+            <button id="save-note" class="sheet-button primary" type="submit">Add note</button>
+          </div>
+        </form>
       </section>
     </main>
 

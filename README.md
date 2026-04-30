@@ -14,17 +14,18 @@ The app stores every board action as an append-only event. The current board is 
 - Rebuild board state from events
 - Show a local activity log
 - Prepare the event adapter for tinySSB synchronization
+- Use a mobile-first UI shaped for a Tremola Android WebView
 
 ## Architecture
 
 ```text
-HTML/CSS/JavaScript mini-app
+Tremola Android WebView
         |
         v
 appendEvent(event)
         |
         v
-local event log now, tinySSB later
+localStorage adapter now, tinySSB adapter later
         |
         v
 replayEvents(events)
@@ -34,6 +35,8 @@ current board state
 ```
 
 The important rule is: UI actions never mutate board objects directly. They always append events first, then the board is rendered from replayed events.
+
+`src/storage.js` is the temporary local adapter. `src/tremola-adapter.js` marks the boundary where the later Tremola/tinySSB append/read API should be connected.
 
 ## Run Locally
 

@@ -1,5 +1,8 @@
 const STORAGE_KEY = "dpi-whiteboard-events";
 
+// Adapter boundary: this file is intentionally small so Tremola/tinySSB can
+// replace localStorage without changing the board UI or replay logic.
+
 export function loadEvents() {
   try {
     const rawEvents = localStorage.getItem(STORAGE_KEY);

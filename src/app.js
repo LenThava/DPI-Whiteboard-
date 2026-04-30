@@ -1,16 +1,25 @@
 import { EVENT_TYPES, createEventFactory, replayEvents } from "./replay.js";
-import { appendLocalEvent, clearEvents, loadEvents } from "./storage.js";
+import { appendLocalEvent, loadEvents } from "./storage.js";
 
 const board = document.querySelector("#board");
 const activityLog = document.querySelector("#activity-log");
 const syncStatus = document.querySelector("#sync-status");
+const modeHint = document.querySelector("#mode-hint");
 const toolButtons = {
   select: document.querySelector("#tool-select"),
   note: document.querySelector("#tool-note"),
   draw: document.querySelector("#tool-draw")
 };
+const editButton = document.querySelector("#edit-selected");
 const deleteButton = document.querySelector("#delete-selected");
-const clearButton = document.querySelector("#clear-local");
+const noteSheet = document.querySelector("#note-sheet");
+const noteForm = document.querySelector("#note-form");
+const noteText = document.querySelector("#note-text");
+const cancelNoteButton = document.querySelector("#cancel-note");
+const saveNoteButton = document.querySelector("#save-note");
+
+const BOARD_WIDTH = 1000;
+const BOARD_HEIGHT = 680;
 
 const author = getOrCreateAuthor();
 const createEvent = createEventFactory(author, loadEvents().length);
@@ -19,13 +28,36 @@ let currentTool = "select";
 let selectedObjectId = null;
 let dragState = null;
 let drawingState = null;
+let noteDraft = null;
 let state = replayEvents(loadEvents());
 
 render();
 
 toolButtons.select.addEventListener("click", () => setTool("select"));
-toolButtons.note.addEventListener("click", () => setTool("note"));
+toolButtons.note.addEventListener("click", () => {
+  setTool("note");
+  openNoteSheet({
+    mode: "create",
+    x: Math.round(BOARD_WIDTH / 2 - 110),
+    y: Math.round(BOARD_HEIGHT / 2 - 36),
+    text: ""
+  });
+});
 toolButtons.draw.addEventListener("click", () => setTool("draw"));
+
+editButton.addEventListener("click", () => {
+  const object = state.objects.find((candidate) => candidate.id === selectedObjectId);
+
+  if (object?.type === "text") {
+    openNoteSheet({
+      mode: "edit",
+      objectId: object.id,
+      x: object.x,
+      y: object.y,
+      text: object.text
+    });
+  }
+});
 
 deleteButton.addEventListener("click", () => {
   if (!selectedObjectId) {
@@ -36,29 +68,52 @@ deleteButton.addEventListener("click", () => {
   selectedObjectId = null;
 });
 
-clearButton.addEventListener("click", () => {
-  clearEvents();
-  selectedObjectId = null;
-  state = replayEvents([]);
-  render();
+cancelNoteButton.addEventListener("click", closeNoteSheet);
+
+noteSheet.addEventListener("click", (event) => {
+  if (event.target === noteSheet) {
+    closeNoteSheet();
+  }
+});
+
+noteForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const text = noteText.value.trim();
+
+  if (!text || !noteDraft) {
+    noteText.focus();
+    return;
+  }
+
+  if (noteDraft.mode === "edit") {
+    appendEvent(EVENT_TYPES.EDIT_TEXT, {
+      objectId: noteDraft.objectId,
+      text
+    });
+  } else {
+    appendEvent(EVENT_TYPES.CREATE_TEXT, {
+      objectId: `${author}:object:${Date.now()}`,
+      x: noteDraft.x,
+      y: noteDraft.y,
+      text
+    });
+  }
+
+  closeNoteSheet();
+  setTool("select");
 });
 
 board.addEventListener("pointerdown", (event) => {
   const point = getBoardPoint(event);
 
   if (currentTool === "note") {
-    const text = prompt("Text note", "New idea");
-
-    if (text && text.trim()) {
-      appendEvent(EVENT_TYPES.CREATE_TEXT, {
-        objectId: `${author}:object:${Date.now()}`,
-        x: point.x,
-        y: point.y,
-        text: text.trim()
-      });
-    }
-
-    setTool("select");
+    openNoteSheet({
+      mode: "create",
+      x: point.x,
+      y: point.y,
+      text: ""
+    });
     return;
   }
 
@@ -149,14 +204,13 @@ board.addEventListener("dblclick", (event) => {
     return;
   }
 
-  const text = prompt("Edit note", object.text);
-
-  if (text !== null && text.trim()) {
-    appendEvent(EVENT_TYPES.EDIT_TEXT, {
-      objectId: object.id,
-      text: text.trim()
-    });
-  }
+  openNoteSheet({
+    mode: "edit",
+    objectId: object.id,
+    x: object.x,
+    y: object.y,
+    text: object.text
+  });
 });
 
 function appendEvent(op, payload) {
@@ -171,6 +225,8 @@ function setTool(tool) {
   for (const [name, button] of Object.entries(toolButtons)) {
     button.classList.toggle("is-active", name === tool);
   }
+
+  renderModeHint();
 }
 
 function render() {
@@ -187,7 +243,9 @@ function render() {
   }
 
   renderActivity();
-  syncStatus.textContent = `${state.activity.length} local events`;
+  renderModeHint();
+  renderSelectionActions();
+  syncStatus.textContent = `${state.activity.length} local`;
 }
 
 function renderTextNote(object) {
@@ -196,12 +254,12 @@ function renderTextNote(object) {
     class: `note ${object.id === selectedObjectId ? "is-selected" : ""}`,
     transform: `translate(${object.x} ${object.y})`
   });
-  const lines = wrapText(object.text, 20);
-  const height = Math.max(72, lines.length * 20 + 34);
+  const lines = wrapText(object.text, 18);
+  const height = Math.max(74, lines.length * 20 + 34);
 
   group.append(
     svgElement("rect", {
-      width: 220,
+      width: 210,
       height,
       rx: 6,
       class: "note-bg"
@@ -254,22 +312,56 @@ function renderPreviewStroke(points) {
 function renderActivity() {
   activityLog.innerHTML = "";
 
-  for (const event of state.activity.slice(-12).reverse()) {
+  for (const event of state.activity.slice(-5).reverse()) {
     const item = document.createElement("li");
-    item.textContent = `${event.author}: ${event.op.replaceAll("_", " ")}`;
+    item.textContent = event.op.replaceAll("_", " ");
     activityLog.append(item);
   }
 }
 
 function getBoardPoint(event) {
   const rect = board.getBoundingClientRect();
-  const scaleX = 1200 / rect.width;
-  const scaleY = 760 / rect.height;
+  const scaleX = BOARD_WIDTH / rect.width;
+  const scaleY = BOARD_HEIGHT / rect.height;
 
   return {
-    x: Math.round((event.clientX - rect.left) * scaleX),
-    y: Math.round((event.clientY - rect.top) * scaleY)
+    x: clamp(Math.round((event.clientX - rect.left) * scaleX), 0, BOARD_WIDTH - 210),
+    y: clamp(Math.round((event.clientY - rect.top) * scaleY), 0, BOARD_HEIGHT - 74)
   };
+}
+
+function openNoteSheet(draft) {
+  noteDraft = draft;
+  noteText.value = draft.text;
+  saveNoteButton.textContent = draft.mode === "edit" ? "Save" : "Add note";
+  noteSheet.classList.add("is-open");
+  noteSheet.setAttribute("aria-hidden", "false");
+  window.setTimeout(() => noteText.focus(), 80);
+}
+
+function closeNoteSheet() {
+  noteDraft = null;
+  noteText.value = "";
+  noteSheet.classList.remove("is-open");
+  noteSheet.setAttribute("aria-hidden", "true");
+}
+
+function renderModeHint() {
+  const hints = {
+    select: selectedObjectId ? "Drag selected note or edit it" : "Select or drag notes",
+    note: "Tap the board to place a note",
+    draw: "Draw with touch or mouse"
+  };
+
+  modeHint.textContent = hints[currentTool];
+}
+
+function renderSelectionActions() {
+  const object = state.objects.find((candidate) => candidate.id === selectedObjectId);
+  const hasSelection = Boolean(object);
+
+  editButton.disabled = object?.type !== "text";
+  deleteButton.disabled = !hasSelection;
 }
 
 function svgElement(name, attributes = {}) {
@@ -309,6 +401,10 @@ function wrapText(text, maxLength) {
 
 function simplifyPoints(points) {
   return points.filter((point, index) => index === 0 || index % 2 === 0 || index === points.length - 1);
+}
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
 }
 
 function getOrCreateAuthor() {

@@ -1,7 +1,7 @@
 :root {
   color-scheme: light;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #f5f2ea;
+  background: #eef1ed;
   color: #232323;
 }
 
@@ -12,6 +12,7 @@
 body {
   margin: 0;
   min-width: 320px;
+  overflow: hidden;
 }
 
 button {
@@ -19,72 +20,76 @@ button {
 }
 
 .app-shell {
+  width: min(100vw, 460px);
   min-height: 100vh;
+  margin: 0 auto;
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  position: relative;
+  background: #f8f7f2;
+  box-shadow: 0 0 0 1px #d8d5cd;
 }
 
 .topbar {
-  min-height: 76px;
+  min-height: 64px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 16px 20px;
+  gap: 10px;
+  padding: max(12px, env(safe-area-inset-top)) 14px 10px;
   border-bottom: 1px solid #ded8cb;
   background: #fffdf8;
 }
 
 .topbar h1 {
   margin: 0;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 720;
 }
 
 .topbar p {
   margin: 3px 0 0;
   color: #68645d;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .sync-pill {
-  min-width: 136px;
-  padding: 8px 12px;
+  min-width: 84px;
+  padding: 7px 9px;
   border: 1px solid #cfd7c7;
   border-radius: 999px;
   background: #eff7e9;
   color: #385537;
   text-align: center;
-  font-size: 13px;
+  font-size: 12px;
   white-space: nowrap;
 }
 
 .workspace {
   display: grid;
-  grid-template-columns: 116px minmax(0, 1fr) 260px;
+  grid-template-rows: minmax(0, 1fr) auto;
   min-height: 0;
-}
-
-.toolbar,
-.side-panel {
-  padding: 16px;
-  background: #fffdf8;
 }
 
 .toolbar {
   display: grid;
-  align-content: start;
-  gap: 10px;
-  border-right: 1px solid #ded8cb;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 7px;
+  padding: 8px 10px max(10px, env(safe-area-inset-bottom));
+  border-top: 1px solid #ded8cb;
+  background: #fffdf8;
 }
 
 .tool-button {
-  min-height: 42px;
+  min-width: 0;
+  min-height: 46px;
   border: 1px solid #cfc8b8;
   border-radius: 6px;
   background: #ffffff;
   color: #2b2a28;
   cursor: pointer;
+  font-size: 13px;
+  font-weight: 680;
 }
 
 .tool-button:hover,
@@ -93,29 +98,52 @@ button {
   background: #eaf1ff;
 }
 
+.tool-button.primary {
+  border-color: #2f7d59;
+  background: #eaf7ef;
+  color: #1f553b;
+}
+
 .tool-button.danger {
   border-color: #d8aca3;
   color: #8e2d20;
 }
 
-.tool-button.subtle {
-  color: #615c52;
+.tool-button:disabled {
+  opacity: 0.42;
+  cursor: default;
 }
 
 .board-wrap {
+  position: relative;
   min-width: 0;
   min-height: 0;
-  padding: 16px;
+  padding: 10px;
   overflow: auto;
+}
+
+.mode-hint {
+  position: absolute;
+  z-index: 2;
+  top: 18px;
+  left: 18px;
+  max-width: calc(100% - 36px);
+  padding: 7px 10px;
+  border: 1px solid rgba(47, 63, 83, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.92);
+  color: #45423d;
+  font-size: 12px;
+  font-weight: 650;
+  pointer-events: none;
 }
 
 .board {
   width: 100%;
-  min-width: 640px;
-  height: calc(100vh - 108px);
-  min-height: 520px;
+  height: 100%;
+  min-height: 0;
   border: 1px solid #d8d0c0;
-  border-radius: 8px;
+  border-radius: 6px;
   background-color: #fffdf8;
   background-image:
     linear-gradient(#ece6da 1px, transparent 1px),
@@ -163,46 +191,123 @@ button {
 }
 
 .side-panel {
-  border-left: 1px solid #ded8cb;
+  padding: 9px 12px 10px;
+  border-top: 1px solid #ded8cb;
+  background: #fffdf8;
   overflow: auto;
 }
 
 .side-panel h2 {
-  margin: 0 0 12px;
-  font-size: 17px;
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: #615c52;
 }
 
 .activity-log {
-  display: grid;
-  gap: 8px;
+  display: flex;
+  gap: 6px;
   margin: 0;
-  padding-left: 18px;
+  padding: 0;
+  list-style: none;
   color: #4f4a43;
-  font-size: 14px;
+  font-size: 12px;
+  overflow: hidden;
 }
 
-@media (max-width: 860px) {
-  .workspace {
-    grid-template-columns: 1fr;
+.activity-log li {
+  flex: 0 0 auto;
+  max-width: 128px;
+  padding: 5px 7px;
+  border: 1px solid #e4ded2;
+  border-radius: 999px;
+  background: #faf8f1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.note-sheet {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  align-items: end;
+  background: rgba(29, 31, 33, 0);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease, background 160ms ease;
+}
+
+.note-sheet.is-open {
+  background: rgba(29, 31, 33, 0.24);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.note-form {
+  display: grid;
+  gap: 10px;
+  padding: 14px 14px max(14px, env(safe-area-inset-bottom));
+  border-top: 1px solid #d8d0c0;
+  border-radius: 12px 12px 0 0;
+  background: #fffdf8;
+  transform: translateY(100%);
+  transition: transform 180ms ease;
+}
+
+.note-sheet.is-open .note-form {
+  transform: translateY(0);
+}
+
+.note-form label {
+  font-size: 13px;
+  font-weight: 750;
+  color: #45423d;
+}
+
+.note-form textarea {
+  width: 100%;
+  resize: none;
+  border: 1px solid #cfc8b8;
+  border-radius: 8px;
+  padding: 10px;
+  background: #ffffff;
+  color: #232323;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.note-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.sheet-button {
+  min-height: 44px;
+  border: 1px solid #cfc8b8;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #2b2a28;
+  font-weight: 720;
+}
+
+.sheet-button.primary {
+  border-color: #2d6cdf;
+  background: #2d6cdf;
+  color: #ffffff;
+}
+
+@media (min-width: 720px) {
+  body {
+    display: grid;
+    place-items: center;
+    min-height: 100vh;
   }
 
-  .toolbar {
-    display: flex;
-    overflow-x: auto;
-    border-right: 0;
-    border-bottom: 1px solid #ded8cb;
-  }
-
-  .tool-button {
-    min-width: 92px;
-  }
-
-  .side-panel {
-    border-left: 0;
-    border-top: 1px solid #ded8cb;
-  }
-
-  .board {
-    height: 62vh;
+  .app-shell {
+    min-height: min(860px, 100vh);
+    max-height: 860px;
   }
 }
