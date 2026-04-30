@@ -64,7 +64,7 @@ export function replayEvents(events) {
         id: objectId,
         type: "stroke",
         points: normalizePoints(event.points),
-        color: event.color || "#2d6cdf",
+        color: event.color || "#111111",
         width: Number(event.width ?? 4),
         author: event.author,
         createdAt: event.time,

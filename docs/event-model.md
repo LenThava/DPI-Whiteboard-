@@ -57,7 +57,7 @@ All shared state is derived from immutable events.
   "op": "draw_stroke",
   "objectId": "bob:stroke:3",
   "points": [[10, 20], [15, 24], [22, 30]],
-  "color": "#2d6cdf",
+  "color": "#111111",
   "width": 4
 }
 ```

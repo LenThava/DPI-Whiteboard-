@@ -1,8 +1,16 @@
+@font-face {
+  font-family: "SST";
+  src: url("../assets/fonts/SSTRg.TTF") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   color-scheme: light;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #eef1ed;
-  color: #232323;
+  font-family: "SST", Arial, sans-serif;
+  background: #ffffff;
+  color: #111111;
 }
 
 * {
@@ -15,7 +23,8 @@ body {
   overflow: hidden;
 }
 
-button {
+button,
+textarea {
   font: inherit;
 }
 
@@ -26,8 +35,7 @@ button {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   position: relative;
-  background: #f8f7f2;
-  box-shadow: 0 0 0 1px #d8d5cd;
+  background: #ffffff;
 }
 
 .topbar {
@@ -36,30 +44,29 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: max(12px, env(safe-area-inset-top)) 14px 10px;
-  border-bottom: 1px solid #ded8cb;
-  background: #fffdf8;
+  padding: max(12px, env(safe-area-inset-top)) 12px 10px;
+  border-bottom: 1px solid #111111;
+  background: #ffffff;
 }
 
 .topbar h1 {
   margin: 0;
   font-size: 18px;
-  font-weight: 720;
+  font-weight: 400;
 }
 
 .topbar p {
   margin: 3px 0 0;
-  color: #68645d;
+  color: #333333;
   font-size: 12px;
 }
 
 .sync-pill {
-  min-width: 84px;
-  padding: 7px 9px;
-  border: 1px solid #cfd7c7;
-  border-radius: 999px;
-  background: #eff7e9;
-  color: #385537;
+  min-width: 80px;
+  padding: 6px 8px;
+  border: 1px solid #111111;
+  background: #ffffff;
+  color: #111111;
   text-align: center;
   font-size: 12px;
   white-space: nowrap;
@@ -71,70 +78,25 @@ button {
   min-height: 0;
 }
 
-.toolbar {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 7px;
-  padding: 8px 10px max(10px, env(safe-area-inset-bottom));
-  border-top: 1px solid #ded8cb;
-  background: #fffdf8;
-}
-
-.tool-button {
-  min-width: 0;
-  min-height: 46px;
-  border: 1px solid #cfc8b8;
-  border-radius: 6px;
-  background: #ffffff;
-  color: #2b2a28;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 680;
-}
-
-.tool-button:hover,
-.tool-button.is-active {
-  border-color: #2d6cdf;
-  background: #eaf1ff;
-}
-
-.tool-button.primary {
-  border-color: #2f7d59;
-  background: #eaf7ef;
-  color: #1f553b;
-}
-
-.tool-button.danger {
-  border-color: #d8aca3;
-  color: #8e2d20;
-}
-
-.tool-button:disabled {
-  opacity: 0.42;
-  cursor: default;
-}
-
 .board-wrap {
   position: relative;
   min-width: 0;
   min-height: 0;
-  padding: 10px;
+  padding: 8px;
   overflow: auto;
 }
 
 .mode-hint {
   position: absolute;
   z-index: 2;
-  top: 18px;
-  left: 18px;
-  max-width: calc(100% - 36px);
-  padding: 7px 10px;
-  border: 1px solid rgba(47, 63, 83, 0.16);
-  border-radius: 999px;
-  background: rgba(255, 253, 248, 0.92);
-  color: #45423d;
+  top: 16px;
+  left: 16px;
+  max-width: calc(100% - 32px);
+  padding: 6px 8px;
+  border: 1px solid #111111;
+  background: #ffffff;
+  color: #111111;
   font-size: 12px;
-  font-weight: 650;
   pointer-events: none;
 }
 
@@ -142,13 +104,8 @@ button {
   width: 100%;
   height: 100%;
   min-height: 0;
-  border: 1px solid #d8d0c0;
-  border-radius: 6px;
-  background-color: #fffdf8;
-  background-image:
-    linear-gradient(#ece6da 1px, transparent 1px),
-    linear-gradient(90deg, #ece6da 1px, transparent 1px);
-  background-size: 32px 32px;
+  border: 1px solid #111111;
+  background: #ffffff;
   touch-action: none;
 }
 
@@ -161,20 +118,20 @@ button {
 }
 
 .note-bg {
-  fill: #ffe484;
-  stroke: #d2ad27;
-  stroke-width: 1.5;
+  fill: #ffffff;
+  stroke: #111111;
+  stroke-width: 1;
 }
 
 .note.is-selected .note-bg {
-  stroke: #2d6cdf;
-  stroke-width: 3;
+  stroke-width: 2;
+  stroke-dasharray: 7 5;
 }
 
 .note-text {
-  fill: #29251b;
+  fill: #111111;
   font-size: 16px;
-  font-weight: 610;
+  font-weight: 400;
   user-select: none;
 }
 
@@ -182,25 +139,30 @@ button {
   cursor: pointer;
 }
 
-.stroke.is-selected {
-  filter: drop-shadow(0 0 4px rgba(45, 108, 223, 0.7));
+.stroke.preview {
+  opacity: 0.55;
 }
 
-.stroke.preview {
-  opacity: 0.65;
+.selection-rect {
+  fill: rgba(0, 0, 0, 0.04);
+  stroke: #111111;
+  stroke-width: 2;
+  stroke-dasharray: 8 6;
+  pointer-events: none;
 }
 
 .side-panel {
-  padding: 9px 12px 10px;
-  border-top: 1px solid #ded8cb;
-  background: #fffdf8;
+  padding: 8px 10px 9px;
+  border-top: 1px solid #111111;
+  background: #ffffff;
   overflow: auto;
 }
 
 .side-panel h2 {
   margin: 0 0 6px;
+  color: #111111;
   font-size: 13px;
-  color: #615c52;
+  font-weight: 400;
 }
 
 .activity-log {
@@ -209,7 +171,7 @@ button {
   margin: 0;
   padding: 0;
   list-style: none;
-  color: #4f4a43;
+  color: #111111;
   font-size: 12px;
   overflow: hidden;
 }
@@ -218,12 +180,41 @@ button {
   flex: 0 0 auto;
   max-width: 128px;
   padding: 5px 7px;
-  border: 1px solid #e4ded2;
-  border-radius: 999px;
-  background: #faf8f1;
+  border: 1px solid #111111;
+  background: #ffffff;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.toolbar {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  padding: 8px 8px max(8px, env(safe-area-inset-bottom));
+  border-top: 1px solid #111111;
+  background: #ffffff;
+}
+
+.tool-button {
+  min-width: 0;
+  min-height: 46px;
+  border: 1px solid #111111;
+  background: #ffffff;
+  color: #111111;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.tool-button:hover,
+.tool-button.is-active {
+  background: #f2f2f2;
+}
+
+.tool-button:disabled {
+  opacity: 0.42;
+  cursor: default;
 }
 
 .note-sheet {
@@ -232,14 +223,13 @@ button {
   z-index: 4;
   display: grid;
   align-items: end;
-  background: rgba(29, 31, 33, 0);
+  background: rgba(255, 255, 255, 0);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 160ms ease, background 160ms ease;
 }
 
 .note-sheet.is-open {
-  background: rgba(29, 31, 33, 0.24);
+  background: rgba(255, 255, 255, 0.72);
   opacity: 1;
   pointer-events: auto;
 }
@@ -248,11 +238,9 @@ button {
   display: grid;
   gap: 10px;
   padding: 14px 14px max(14px, env(safe-area-inset-bottom));
-  border-top: 1px solid #d8d0c0;
-  border-radius: 12px 12px 0 0;
-  background: #fffdf8;
+  border-top: 1px solid #111111;
+  background: #ffffff;
   transform: translateY(100%);
-  transition: transform 180ms ease;
 }
 
 .note-sheet.is-open .note-form {
@@ -260,20 +248,18 @@ button {
 }
 
 .note-form label {
+  color: #111111;
   font-size: 13px;
-  font-weight: 750;
-  color: #45423d;
+  font-weight: 400;
 }
 
 .note-form textarea {
   width: 100%;
   resize: none;
-  border: 1px solid #cfc8b8;
-  border-radius: 8px;
+  border: 1px solid #111111;
   padding: 10px;
   background: #ffffff;
-  color: #232323;
-  font: inherit;
+  color: #111111;
   font-size: 16px;
   line-height: 1.35;
 }
@@ -286,16 +272,14 @@ button {
 
 .sheet-button {
   min-height: 44px;
-  border: 1px solid #cfc8b8;
-  border-radius: 6px;
+  border: 1px solid #111111;
   background: #ffffff;
-  color: #2b2a28;
-  font-weight: 720;
+  color: #111111;
+  font-weight: 400;
 }
 
 .sheet-button.primary {
-  border-color: #2d6cdf;
-  background: #2d6cdf;
+  background: #111111;
   color: #ffffff;
 }
 
