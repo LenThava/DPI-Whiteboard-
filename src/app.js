@@ -3,9 +3,7 @@ import { createEventStore } from "./storage.js";
 import { APP_ID, BOARD_ID, EVENT_SCHEMA } from "./config.js";
 
 const board = document.querySelector("#board");
-const userNameInput = document.querySelector("#user-name");
 const activityLine = document.querySelector("#activity-line");
-const syncStatus = document.querySelector("#sync-status");
 const modeHint = document.querySelector("#mode-hint");
 const toolButtons = {
   select: document.querySelector("#tool-select"),
@@ -22,7 +20,6 @@ const saveNoteButton = document.querySelector("#save-note");
 
 const BOARD_WIDTH = 1000;
 const BOARD_HEIGHT = 680;
-const USER_NAME_KEY = "tremola-whiteboard-user-name";
 
 const eventStore = createEventStore();
 const author = getOrCreateAuthor();
@@ -36,7 +33,6 @@ let selectionState = null;
 let noteDraft = null;
 let state = replayEvents([]);
 
-userNameInput.value = getStoredUserName();
 init();
 
 async function init() {
@@ -45,11 +41,6 @@ async function init() {
   state = replayEvents(events);
   render();
 }
-
-userNameInput.addEventListener("input", () => {
-  localStorage.setItem(USER_NAME_KEY, getCurrentUserName());
-  renderSyncStatus();
-});
 
 toolButtons.select.addEventListener("click", () => setTool("select"));
 toolButtons.note.addEventListener("click", () => {
@@ -276,7 +267,7 @@ async function appendEvent(op, payload) {
     appId: APP_ID,
     boardId: BOARD_ID,
     schema: EVENT_SCHEMA,
-    actorName: getCurrentUserName(),
+    actorName: "Nutzer",
     ...payload
   });
   const events = await eventStore.appendEvent(event);
@@ -310,7 +301,6 @@ function render() {
   renderActivityLine();
   renderModeHint();
   renderSelectionActions();
-  renderSyncStatus();
 }
 
 function renderTextNote(object) {
@@ -383,18 +373,7 @@ function renderActivityLine() {
     return;
   }
 
-  const user = event.actorName || event.author || "Nutzer";
-  activityLine.textContent = `${user} hat ${getActionText(event.op)}`;
-}
-
-function renderSyncStatus() {
-  const people = new Set([getCurrentUserName()]);
-
-  for (const event of state.activity) {
-    people.add(event.actorName || event.author);
-  }
-
-  syncStatus.textContent = `${people.size} Nutzer`;
+  activityLine.textContent = getActionText(event.op);
 }
 
 function getBoardPoint(event) {
@@ -574,21 +553,13 @@ function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
-function getStoredUserName() {
-  return localStorage.getItem(USER_NAME_KEY) || "Dehlen";
-}
-
-function getCurrentUserName() {
-  return userNameInput.value.trim() || "Nutzer";
-}
-
 function getActionText(op) {
   const labels = {
-    [EVENT_TYPES.CREATE_TEXT]: "eine Notiz erstellt",
-    [EVENT_TYPES.EDIT_TEXT]: "eine Notiz bearbeitet",
-    [EVENT_TYPES.MOVE]: "eine Notiz verschoben",
-    [EVENT_TYPES.DELETE]: "ein Objekt gelöscht",
-    [EVENT_TYPES.DRAW_STROKE]: "gezeichnet"
+    [EVENT_TYPES.CREATE_TEXT]: "Notiz erstellt",
+    [EVENT_TYPES.EDIT_TEXT]: "Notiz bearbeitet",
+    [EVENT_TYPES.MOVE]: "Notiz verschoben",
+    [EVENT_TYPES.DELETE]: "Objekt gelöscht",
+    [EVENT_TYPES.DRAW_STROKE]: "Gezeichnet"
   };
 
   return labels[op] || op.replaceAll("_", " ");

@@ -4,7 +4,6 @@ Kleine offline-first Whiteboard Mini-App fuer Tremola.
 
 ## Benutzung
 
-- Name eintragen
 - `Notiz` waehlen und eine Notiz schreiben
 - `Zeichnen` waehlen und auf der Flaeche zeichnen
 - `Auswahl` waehlen und einen Rahmen um Objekte ziehen
