@@ -11,7 +11,7 @@
       <header class="topbar">
         <div>
           <h1>Tremola Whiteboard</h1>
-          <p>DPI Mini App Demo</p>
+          <p>DPI Mini App Dehlen</p>
         </div>
         <div class="sync-pill" id="sync-status">local event log</div>
       </header>
@@ -22,9 +22,12 @@
           <svg id="board" class="board" viewBox="0 0 1000 680" role="img" aria-label="Object based collaboration board"></svg>
         </section>
 
-        <aside class="side-panel">
-          <h2>Activity</h2>
-          <ol id="activity-log" class="activity-log"></ol>
+        <aside class="status-panel">
+          <label class="user-field" for="user-name">
+            <span>Name</span>
+            <input id="user-name" type="text" maxlength="24" autocomplete="off" placeholder="Dehlen">
+          </label>
+          <p id="activity-line" class="activity-line">Noch keine Aktion</p>
         </aside>
       </section>
 

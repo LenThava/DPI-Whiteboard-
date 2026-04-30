@@ -25,7 +25,7 @@ Build a full path from user action to event to replayed board state.
 - Move and edit notes
 - Delete objects
 - Draw freehand strokes
-- Activity log
+- Compact user name and latest action status
 
 ### Milestone 2: Sync Simulation
 

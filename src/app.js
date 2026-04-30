@@ -2,7 +2,8 @@ import { EVENT_TYPES, createEventFactory, replayEvents } from "./replay.js";
 import { appendLocalEvent, loadEvents } from "./storage.js";
 
 const board = document.querySelector("#board");
-const activityLog = document.querySelector("#activity-log");
+const userNameInput = document.querySelector("#user-name");
+const activityLine = document.querySelector("#activity-line");
 const syncStatus = document.querySelector("#sync-status");
 const modeHint = document.querySelector("#mode-hint");
 const toolButtons = {
@@ -20,6 +21,7 @@ const saveNoteButton = document.querySelector("#save-note");
 
 const BOARD_WIDTH = 1000;
 const BOARD_HEIGHT = 680;
+const USER_NAME_KEY = "tremola-whiteboard-user-name";
 
 const author = getOrCreateAuthor();
 const createEvent = createEventFactory(author, loadEvents().length);
@@ -32,7 +34,12 @@ let selectionState = null;
 let noteDraft = null;
 let state = replayEvents(loadEvents());
 
+userNameInput.value = getStoredUserName();
 render();
+
+userNameInput.addEventListener("input", () => {
+  localStorage.setItem(USER_NAME_KEY, getCurrentUserName());
+});
 
 toolButtons.select.addEventListener("click", () => setTool("select"));
 toolButtons.note.addEventListener("click", () => {
@@ -253,7 +260,10 @@ board.addEventListener("dblclick", (event) => {
 });
 
 function appendEvent(op, payload) {
-  const events = appendLocalEvent(createEvent(op, payload));
+  const events = appendLocalEvent(createEvent(op, {
+    actorName: getCurrentUserName(),
+    ...payload
+  }));
   state = replayEvents(events);
   render();
 }
@@ -281,7 +291,7 @@ function render() {
     }
   }
 
-  renderActivity();
+  renderActivityLine();
   renderModeHint();
   renderSelectionActions();
   syncStatus.textContent = `${state.activity.length} local`;
@@ -348,14 +358,16 @@ function renderPreviewStroke(points) {
   board.append(preview);
 }
 
-function renderActivity() {
-  activityLog.innerHTML = "";
+function renderActivityLine() {
+  const event = state.activity.at(-1);
 
-  for (const event of state.activity.slice(-5).reverse()) {
-    const item = document.createElement("li");
-    item.textContent = event.op.replaceAll("_", " ");
-    activityLog.append(item);
+  if (!event) {
+    activityLine.textContent = "Noch keine Aktion";
+    return;
   }
+
+  const user = event.actorName || event.author || "Nutzer";
+  activityLine.textContent = `${user} hat ${getActionText(event.op)}`;
 }
 
 function getBoardPoint(event) {
@@ -559,6 +571,26 @@ function clampNotePosition(x, y) {
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
+}
+
+function getStoredUserName() {
+  return localStorage.getItem(USER_NAME_KEY) || "Dehlen";
+}
+
+function getCurrentUserName() {
+  return userNameInput.value.trim() || "Nutzer";
+}
+
+function getActionText(op) {
+  const labels = {
+    [EVENT_TYPES.CREATE_TEXT]: "eine Notiz erstellt",
+    [EVENT_TYPES.EDIT_TEXT]: "eine Notiz bearbeitet",
+    [EVENT_TYPES.MOVE]: "eine Notiz verschoben",
+    [EVENT_TYPES.DELETE]: "ein Objekt gelöscht",
+    [EVENT_TYPES.DRAW_STROKE]: "gezeichnet"
+  };
+
+  return labels[op] || op.replaceAll("_", " ");
 }
 
 function getOrCreateAuthor() {
