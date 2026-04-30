@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DPI Whiteboard Tremola App</title>
+    <link rel="stylesheet" href="./src/styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <h1>DPI Whiteboard</h1>
+          <p>Offline-first board prototype</p>
+        </div>
+        <div class="sync-pill" id="sync-status">local event log</div>
+      </header>
+
+      <section class="workspace">
+        <aside class="toolbar" aria-label="Board tools">
+          <button id="tool-select" class="tool-button is-active" type="button">Select</button>
+          <button id="tool-note" class="tool-button" type="button">Note</button>
+          <button id="tool-draw" class="tool-button" type="button">Draw</button>
+          <button id="delete-selected" class="tool-button danger" type="button">Delete</button>
+          <button id="clear-local" class="tool-button subtle" type="button">Clear local</button>
+        </aside>
+
+        <section class="board-wrap" aria-label="Shared board">
+          <svg id="board" class="board" viewBox="0 0 1200 760" role="img" aria-label="Object based collaboration board"></svg>
+        </section>
+
+        <aside class="side-panel">
+          <h2>Activity</h2>
+          <ol id="activity-log" class="activity-log"></ol>
+        </aside>
+      </section>
+    </main>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>

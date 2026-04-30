@@ -1,0 +1,208 @@
+:root {
+  color-scheme: light;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f5f2ea;
+  color: #232323;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+button {
+  font: inherit;
+}
+
+.app-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.topbar {
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #ded8cb;
+  background: #fffdf8;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 720;
+}
+
+.topbar p {
+  margin: 3px 0 0;
+  color: #68645d;
+  font-size: 14px;
+}
+
+.sync-pill {
+  min-width: 136px;
+  padding: 8px 12px;
+  border: 1px solid #cfd7c7;
+  border-radius: 999px;
+  background: #eff7e9;
+  color: #385537;
+  text-align: center;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr) 260px;
+  min-height: 0;
+}
+
+.toolbar,
+.side-panel {
+  padding: 16px;
+  background: #fffdf8;
+}
+
+.toolbar {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  border-right: 1px solid #ded8cb;
+}
+
+.tool-button {
+  min-height: 42px;
+  border: 1px solid #cfc8b8;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #2b2a28;
+  cursor: pointer;
+}
+
+.tool-button:hover,
+.tool-button.is-active {
+  border-color: #2d6cdf;
+  background: #eaf1ff;
+}
+
+.tool-button.danger {
+  border-color: #d8aca3;
+  color: #8e2d20;
+}
+
+.tool-button.subtle {
+  color: #615c52;
+}
+
+.board-wrap {
+  min-width: 0;
+  min-height: 0;
+  padding: 16px;
+  overflow: auto;
+}
+
+.board {
+  width: 100%;
+  min-width: 640px;
+  height: calc(100vh - 108px);
+  min-height: 520px;
+  border: 1px solid #d8d0c0;
+  border-radius: 8px;
+  background-color: #fffdf8;
+  background-image:
+    linear-gradient(#ece6da 1px, transparent 1px),
+    linear-gradient(90deg, #ece6da 1px, transparent 1px);
+  background-size: 32px 32px;
+  touch-action: none;
+}
+
+.note {
+  cursor: grab;
+}
+
+.note:active {
+  cursor: grabbing;
+}
+
+.note-bg {
+  fill: #ffe484;
+  stroke: #d2ad27;
+  stroke-width: 1.5;
+}
+
+.note.is-selected .note-bg {
+  stroke: #2d6cdf;
+  stroke-width: 3;
+}
+
+.note-text {
+  fill: #29251b;
+  font-size: 16px;
+  font-weight: 610;
+  user-select: none;
+}
+
+.stroke {
+  cursor: pointer;
+}
+
+.stroke.is-selected {
+  filter: drop-shadow(0 0 4px rgba(45, 108, 223, 0.7));
+}
+
+.stroke.preview {
+  opacity: 0.65;
+}
+
+.side-panel {
+  border-left: 1px solid #ded8cb;
+  overflow: auto;
+}
+
+.side-panel h2 {
+  margin: 0 0 12px;
+  font-size: 17px;
+}
+
+.activity-log {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 18px;
+  color: #4f4a43;
+  font-size: 14px;
+}
+
+@media (max-width: 860px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar {
+    display: flex;
+    overflow-x: auto;
+    border-right: 0;
+    border-bottom: 1px solid #ded8cb;
+  }
+
+  .tool-button {
+    min-width: 92px;
+  }
+
+  .side-panel {
+    border-left: 0;
+    border-top: 1px solid #ded8cb;
+  }
+
+  .board {
+    height: 62vh;
+  }
+}
