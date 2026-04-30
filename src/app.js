@@ -27,7 +27,7 @@ const author = getOrCreateAuthor();
 const createEvent = createEventFactory(author, loadEvents().length);
 
 let currentTool = "select";
-let selectedObjectId = null;
+let selectedIds = new Set();
 let dragState = null;
 let drawingState = null;
 let selectionState = null;
@@ -39,6 +39,7 @@ render();
 
 userNameInput.addEventListener("input", () => {
   localStorage.setItem(USER_NAME_KEY, getCurrentUserName());
+  renderSyncStatus();
 });
 
 toolButtons.select.addEventListener("click", () => setTool("select"));
@@ -54,7 +55,7 @@ toolButtons.note.addEventListener("click", () => {
 toolButtons.draw.addEventListener("click", () => setTool("draw"));
 
 editButton.addEventListener("click", () => {
-  const object = state.objects.find((candidate) => candidate.id === selectedObjectId);
+  const object = getSingleSelectedObject();
 
   if (object?.type === "text") {
     openNoteSheet({
@@ -68,12 +69,14 @@ editButton.addEventListener("click", () => {
 });
 
 deleteButton.addEventListener("click", () => {
-  if (!selectedObjectId) {
+  const ids = [...selectedIds];
+
+  if (ids.length === 0) {
     return;
   }
 
-  appendEvent(EVENT_TYPES.DELETE, { objectId: selectedObjectId });
-  selectedObjectId = null;
+  selectedIds.clear();
+  ids.forEach((objectId) => appendEvent(EVENT_TYPES.DELETE, { objectId }));
 });
 
 cancelNoteButton.addEventListener("click", closeNoteSheet);
@@ -141,10 +144,10 @@ board.addEventListener("pointerdown", (event) => {
   const objectId = event.target.closest("[data-object-id]")?.dataset.objectId;
   const object = state.objects.find((candidate) => candidate.id === objectId);
 
-  if (objectId === selectedObjectId && object?.type === "text") {
+  if (selectedIds.has(objectId) && object?.type === "text") {
     dragState = {
       pointerId: event.pointerId,
-      objectId: selectedObjectId,
+      objectId,
       offsetX: point.x - object.x,
       offsetY: point.y - object.y
     };
@@ -152,7 +155,7 @@ board.addEventListener("pointerdown", (event) => {
     return;
   }
 
-  selectedObjectId = null;
+  selectedIds.clear();
   selectionState = {
     pointerId: event.pointerId,
     start: point,
@@ -209,7 +212,7 @@ board.addEventListener("pointerup", (event) => {
 
   if (selectionState) {
     selectionState.current = getBoardPoint(event);
-    selectedObjectId = findObjectInSelection(selectionState);
+    selectedIds = new Set(findObjectsInSelection(selectionState).map((object) => object.id));
     selectionState = null;
     board.releasePointerCapture(event.pointerId);
     render();
@@ -294,13 +297,13 @@ function render() {
   renderActivityLine();
   renderModeHint();
   renderSelectionActions();
-  syncStatus.textContent = `${state.activity.length} local`;
+  renderSyncStatus();
 }
 
 function renderTextNote(object) {
   const group = svgElement("g", {
     "data-object-id": object.id,
-    class: `note ${object.id === selectedObjectId ? "is-selected" : ""}`,
+    class: `note ${selectedIds.has(object.id) ? "is-selected" : ""}`,
     transform: `translate(${object.x} ${object.y})`
   });
   const lines = wrapText(object.text, 18);
@@ -329,13 +332,14 @@ function renderTextNote(object) {
 }
 
 function renderStroke(object) {
+  const selected = selectedIds.has(object.id);
   const polyline = svgElement("polyline", {
     "data-object-id": object.id,
-    class: `stroke ${object.id === selectedObjectId ? "is-selected" : ""}`,
+    class: `stroke ${selected ? "is-selected" : ""}`,
     points: object.points.map(([x, y]) => `${x},${y}`).join(" "),
     fill: "none",
     stroke: object.color,
-    "stroke-width": object.id === selectedObjectId ? object.width + 2 : object.width,
+    "stroke-width": selected ? object.width + 2 : object.width,
     "stroke-linecap": "round",
     "stroke-linejoin": "round"
   });
@@ -370,6 +374,16 @@ function renderActivityLine() {
   activityLine.textContent = `${user} hat ${getActionText(event.op)}`;
 }
 
+function renderSyncStatus() {
+  const people = new Set([getCurrentUserName()]);
+
+  for (const event of state.activity) {
+    people.add(event.actorName || event.author);
+  }
+
+  syncStatus.textContent = `${people.size} Nutzer`;
+}
+
 function getBoardPoint(event) {
   const rect = board.getBoundingClientRect();
   const scaleX = BOARD_WIDTH / rect.width;
@@ -399,7 +413,7 @@ function closeNoteSheet() {
 
 function renderModeHint() {
   const hints = {
-    select: selectedObjectId ? "Selected. Drag note to move it" : "Draw a box around an object",
+    select: selectedIds.size ? `${selectedIds.size} selected` : "Draw a box around objects",
     note: "Tap the board to place a note",
     draw: "Draw with touch or mouse"
   };
@@ -408,11 +422,10 @@ function renderModeHint() {
 }
 
 function renderSelectionActions() {
-  const object = state.objects.find((candidate) => candidate.id === selectedObjectId);
-  const hasSelection = Boolean(object);
+  const object = getSingleSelectedObject();
 
   editButton.disabled = object?.type !== "text";
-  deleteButton.disabled = !hasSelection;
+  deleteButton.disabled = selectedIds.size === 0;
 }
 
 function svgElement(name, attributes = {}) {
@@ -478,29 +491,17 @@ function renderSelectionPreview() {
   );
 }
 
-function findObjectInSelection(selection) {
+function findObjectsInSelection(selection) {
   const box = normalizeSelectionBox(selection);
 
   if (box.width < 12 || box.height < 12) {
-    return null;
+    return [];
   }
 
-  const fullyContained = state.objects.filter((object) => {
+  return state.objects.filter((object) => {
     const bounds = getObjectBounds(object);
-    return bounds && rectContains(box, bounds);
+    return bounds && rectsOverlap(box, bounds);
   });
-  const candidates = fullyContained.length > 0
-    ? fullyContained
-    : state.objects.filter((object) => {
-        const bounds = getObjectBounds(object);
-        return bounds && rectsOverlap(box, bounds);
-      });
-
-  const selected = candidates
-    .map((object) => ({ object, area: rectArea(getObjectBounds(object)) }))
-    .sort((a, b) => a.area - b.area)[0]?.object;
-
-  return selected?.id || null;
 }
 
 function getObjectBounds(object) {
@@ -540,15 +541,6 @@ function normalizeSelectionBox(selection) {
   return { x, y, width, height };
 }
 
-function rectContains(outer, inner) {
-  return (
-    inner.x >= outer.x &&
-    inner.y >= outer.y &&
-    inner.x + inner.width <= outer.x + outer.width &&
-    inner.y + inner.height <= outer.y + outer.height
-  );
-}
-
 function rectsOverlap(a, b) {
   return (
     a.x < b.x + b.width &&
@@ -556,10 +548,6 @@ function rectsOverlap(a, b) {
     a.y < b.y + b.height &&
     a.y + a.height > b.y
   );
-}
-
-function rectArea(rect) {
-  return rect.width * rect.height;
 }
 
 function clampNotePosition(x, y) {
@@ -591,6 +579,15 @@ function getActionText(op) {
   };
 
   return labels[op] || op.replaceAll("_", " ");
+}
+
+function getSingleSelectedObject() {
+  if (selectedIds.size !== 1) {
+    return null;
+  }
+
+  const [id] = selectedIds;
+  return state.objects.find((object) => object.id === id);
 }
 
 function getOrCreateAuthor() {

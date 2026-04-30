@@ -12,7 +12,7 @@ The app stores every board action as an append-only event. The current board is 
 - Draw simple freehand strokes
 - Delete objects
 - Rebuild board state from events
-- Show a local activity log
+- Show a compact latest-action status
 - Prepare the event adapter for tinySSB synchronization
 - Use a mobile-first UI shaped for a Tremola Android WebView
 - Select objects by drawing a selection box around them
